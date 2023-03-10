@@ -1,0 +1,4 @@
+name: paper_mysql
+version: '${project.version}'
+main: io.tsukasau.paper_mysql.inventory_sync
+api-version: 1.19
