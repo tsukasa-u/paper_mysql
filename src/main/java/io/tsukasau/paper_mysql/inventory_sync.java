@@ -51,7 +51,7 @@ public final class inventory_sync extends JavaPlugin implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) throws SQLException {
         Player player = event.getPlayer();
 //            statusRecord.deletePlayer(player);
-        statusRecord.savePlayer(player);
+        statusRecord.savePlayer(player, "UPDATE");
         event.getPlayer().sendMessage(Component.text("save!, " + event.getPlayer().getName() + "!"));
     }
 }
