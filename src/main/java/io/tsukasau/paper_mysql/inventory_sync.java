@@ -11,9 +11,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.SQLException;
+import java.util.Objects;
 
 public final class inventory_sync extends JavaPlugin implements Listener {
-    StatusRecord statusRecord = null;
+    static StatusRecord statusRecord = null;
 
     @Override
     public void onEnable() {
@@ -22,6 +23,7 @@ public final class inventory_sync extends JavaPlugin implements Listener {
         FileConfiguration config = getConfig();
 
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
+        Objects.requireNonNull(getCommand("updateInventory")).setExecutor(new CommandClass());
 
 
         String host = "", database = "", username = "", password ="";
@@ -42,8 +44,7 @@ public final class inventory_sync extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        statusRecord.loadPlayer(player);
-        event.getPlayer().sendMessage(Component.text("load!, " + event.getPlayer().getName() + "!"));
+        statusRecord.loadPlayer(player, "");
     }
 
 
