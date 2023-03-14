@@ -1,4 +1,5 @@
 package io.tsukasau.paper_mysql;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -144,7 +145,7 @@ public class StatusRecord {
         }
     }
 
-    public void loadPlayer(Player player) {
+    public void loadPlayer(Player player, String option) {
 
         try {
             openConnection();
@@ -154,6 +155,9 @@ public class StatusRecord {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             if (preparedStatement == null) return;
 
+            int steps = 0;
+            int max_steps = 10;
+
             ResultSet rs = preparedStatement.executeQuery(sql);
             while(true) {
                 if (rs.next()) {
@@ -161,7 +165,7 @@ public class StatusRecord {
                     byte[] ender_item = rs.getBytes(4);
                     String sql_status = rs.getString(5);
 
-                    if (Objects.equals(sql_status, "SAVED")) {
+                    if (Objects.equals(sql_status, "SAVED") || Objects.equals(option, "ENFORCE")) {
 
                         int[] inventory_slot_array = {
                                 0, 1, 2, 3, 4, 5, 6, 7, 8,
@@ -191,10 +195,17 @@ public class StatusRecord {
                         preparedStatement.setString(2, uuid.toString());
                         preparedStatement.executeUpdate();
 
+                        player.sendMessage(Component.text("load!, " + player.getName() + "!"));
+
                         break;
 
                     } else if (Objects.equals(sql_status, "LOADED")) {
 
+                        steps++;
+                        if (steps < max_steps) {
+                            player.sendMessage(Component.text("filed to load!, " + player.getName() + "!"));
+                            break;
+                        }
                         try {
                             Thread.sleep(200);
                         } catch (InterruptedException e) {
@@ -248,7 +259,7 @@ public class StatusRecord {
             preparedStatement.setString(4, uuid.toString());
             preparedStatement.executeUpdate();
         } else if (Objects.equals(option, "INSERT")) {
-            String sql = "INSERT INTO inventory (name, uuid, inventory_item, ender_item) VALUES (?, ?, ?, ?, ?);";
+            String sql = "INSERT INTO inventory (name, uuid, inventory_item, ender_item, status) VALUES (?, ?, ?, ?, ?);";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, uuid.toString());
