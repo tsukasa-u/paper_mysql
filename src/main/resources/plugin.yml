@@ -2,3 +2,21 @@ name: paper_mysql
 version: '${project.version}'
 main: io.tsukasau.paper_mysql.inventory_sync
 api-version: 1.19
+
+commands:
+  updateInventory:
+    description: "This is a command"
+    usage: "/command <arg>"
+    aliases: [cmd, command]
+    permission: permission.node
+    permission-message: "You do not have permission to use this command"
+
+permissions:
+  permission.node:
+    description: "This is a permission node"
+    default: op
+    children:
+      permission.node.child: true
+  another.permission.node:
+    description: "This is another permission node"
+    default: not op
