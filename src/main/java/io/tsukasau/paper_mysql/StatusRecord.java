@@ -1,8 +1,12 @@
 package io.tsukasau.paper_mysql;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.nio.ByteBuffer;
 import java.sql.*;
@@ -13,14 +17,15 @@ public class StatusRecord {
 
     private Connection connection;
     final private String host, database, username, password;
-    final private int port;
+    final private int port, timeout;
 
-    public StatusRecord(String _host, int _port, String _database, String _username, String _password) {
+    public StatusRecord(String _host, int _port, String _database, String _username, String _password, int _timeout) {
         host = _host;
         port = _port;
         database = _database;
         username = _username;
         password = _password;
+        timeout = _timeout;
     }
 
 
@@ -151,75 +156,174 @@ public class StatusRecord {
             openConnection();
             UUID uuid = player.getUniqueId();
 
-            String sql = "SELECT * FROM inventory WHERE uuid='" + uuid.toString() +  "';";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            if (preparedStatement == null) return;
+//            String sql = "SELECT * FROM inventory WHERE uuid='" + uuid.toString() + "';";
+//            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+//            if (preparedStatement == null) return;
+//
+//            int steps = 0;
+//
+//            ResultSet rs = preparedStatement.executeQuery(sql);
+//            task = Bukkit.getScheduler().runTaskTimer((Plugin) this,
+            class Runnable extends BukkitRunnable {
 
-            int steps = 0;
-            int max_steps = 10;
+                int steps = 0;
 
-            ResultSet rs = preparedStatement.executeQuery(sql);
-            while(true) {
-                if (rs.next()) {
-                    byte[] inventory_item = rs.getBytes(3);
-                    byte[] ender_item = rs.getBytes(4);
-                    String sql_status = rs.getString(5);
+                @Override
+                public void run() {
 
-                    if (Objects.equals(sql_status, "SAVED") || Objects.equals(option, "ENFORCE")) {
+                    String sql = "SELECT * FROM inventory WHERE uuid='" + uuid.toString() + "';";
+                    PreparedStatement preparedStatement = null;
+                    try {
+                        preparedStatement = connection.prepareStatement(sql);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    ResultSet rs = null;
+                    try {
+                        rs = preparedStatement.executeQuery(sql);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
 
-                        int[] inventory_slot_array = {
-                                0, 1, 2, 3, 4, 5, 6, 7, 8,
-                                9, 10, 11, 12, 13, 14, 15, 16, 17,
-                                18, 19, 20, 21, 22, 23, 24, 25, 26,
-                                27, 28, 29, 30, 31, 32, 33, 34, 35,
-                                36,37,38,39,40
+                    try {
+                        if (rs.next()) {
+                            byte[] inventory_item = rs.getBytes(3);
+                            byte[] ender_item = rs.getBytes(4);
+                            String sql_status = rs.getString(5);
+
+                            if (Objects.equals(sql_status, "SAVED") || Objects.equals(option, "ENFORCE")) {
+
+                                int[] inventory_slot_array = {
+                                        0, 1, 2, 3, 4, 5, 6, 7, 8,
+                                        9, 10, 11, 12, 13, 14, 15, 16, 17,
+                                        18, 19, 20, 21, 22, 23, 24, 25, 26,
+                                        27, 28, 29, 30, 31, 32, 33, 34, 35,
+                                        36, 37, 38, 39, 40
 //                                100,
 //                                101,
 //                                102,
 //                                103,
 //                                106
-                        };
-                        int[] ender_slot_array = {
-                                0, 1, 2, 3, 4, 5, 6, 7, 8,
-                                9, 10, 11, 12, 13, 14, 15, 16, 17,
-                                18, 19, 20, 21, 22, 23, 24, 25, 26
-                        };
+                                };
+                                int[] ender_slot_array = {
+                                        0, 1, 2, 3, 4, 5, 6, 7, 8,
+                                        9, 10, 11, 12, 13, 14, 15, 16, 17,
+                                        18, 19, 20, 21, 22, 23, 24, 25, 26
+                                };
 
-                        load_ItemStack_JSON(player, inventory_slot_array, inventory_item, "inventory");
-                        load_ItemStack_JSON(player, ender_slot_array, ender_item, "enderChest");
+                                load_ItemStack_JSON(player, inventory_slot_array, inventory_item, "inventory");
+                                load_ItemStack_JSON(player, ender_slot_array, ender_item, "enderChest");
 
 
-                        sql = "UPDATE inventory SET status = ? WHERE uuid = ?;";
-                        preparedStatement = connection.prepareStatement(sql);
-                        preparedStatement.setString(1, "LOADED");
-                        preparedStatement.setString(2, uuid.toString());
-                        preparedStatement.executeUpdate();
+                                sql = "UPDATE inventory SET status = ? WHERE uuid = ?;";
+                                preparedStatement = connection.prepareStatement(sql);
+                                preparedStatement.setString(1, "LOADED");
+                                preparedStatement.setString(2, uuid.toString());
+                                preparedStatement.executeUpdate();
 
-                        player.sendMessage(Component.text("load!, " + player.getName() + "!"));
+                                if (Objects.equals(option, "ENFORCE")) {
+                                    player.sendMessage(Component.text("enforced to update inventory!, " + player.getName() + "!"));
+                                } else {
+                                    player.sendMessage(Component.text("load!, " + player.getName() + "!"));
+                                }
 
-                        break;
+                                cancel();
+//                                break;
 
-                    } else if (Objects.equals(sql_status, "LOADED")) {
+                            } else if (Objects.equals(sql_status, "LOADED")) {
 
-                        steps++;
-                        if (steps < max_steps) {
-                            player.sendMessage(Component.text("filed to load!, " + player.getName() + "!"));
-                            break;
+                                if (steps > timeout) {
+                                    player.sendMessage(Component.text("filed to load!, " + player.getName() + "!"));
+                                    cancel();
+//                                    break;
+                                }
+                                try {
+                                    Thread.sleep(200);
+                                    steps += 200;
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                preparedStatement = connection.prepareStatement(sql);
+                                if (preparedStatement == null) return;
+
+                                rs = preparedStatement.executeQuery(sql);
+                            }
+                        } else {
+                            savePlayer(player, "INSERT");
                         }
-                        try {
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        preparedStatement = connection.prepareStatement(sql);
-                        if (preparedStatement == null) return;
-
-                        rs = preparedStatement.executeQuery(sql);
+                    } catch (SQLException ex) {
+                        throw new RuntimeException(ex);
                     }
-                } else {
-                    savePlayer(player, "INSERT");
                 }
-            }
+            };
+
+            new Runnable().runTaskTimer(inventory_sync.getProvidingPlugin(), 0L, 4L);
+//
+//            while(true) {
+//                if (rs.next()) {
+//                    byte[] inventory_item = rs.getBytes(3);
+//                    byte[] ender_item = rs.getBytes(4);
+//                    String sql_status = rs.getString(5);
+//
+//                    if (Objects.equals(sql_status, "SAVED") || Objects.equals(option, "ENFORCE")) {
+//
+//                        int[] inventory_slot_array = {
+//                                0, 1, 2, 3, 4, 5, 6, 7, 8,
+//                                9, 10, 11, 12, 13, 14, 15, 16, 17,
+//                                18, 19, 20, 21, 22, 23, 24, 25, 26,
+//                                27, 28, 29, 30, 31, 32, 33, 34, 35,
+//                                36,37,38,39,40
+////                                100,
+////                                101,
+////                                102,
+////                                103,
+////                                106
+//                        };
+//                        int[] ender_slot_array = {
+//                                0, 1, 2, 3, 4, 5, 6, 7, 8,
+//                                9, 10, 11, 12, 13, 14, 15, 16, 17,
+//                                18, 19, 20, 21, 22, 23, 24, 25, 26
+//                        };
+//
+//                        load_ItemStack_JSON(player, inventory_slot_array, inventory_item, "inventory");
+//                        load_ItemStack_JSON(player, ender_slot_array, ender_item, "enderChest");
+//
+//
+//                        sql = "UPDATE inventory SET status = ? WHERE uuid = ?;";
+//                        preparedStatement = connection.prepareStatement(sql);
+//                        preparedStatement.setString(1, "LOADED");
+//                        preparedStatement.setString(2, uuid.toString());
+//                        preparedStatement.executeUpdate();
+//
+//                        player.sendMessage(Component.text("load!, " + player.getName() + "!"));
+//
+//                        break;
+//
+//                    } else if (Objects.equals(sql_status, "LOADED")) {
+//
+//                        if (steps < timeout) {
+//                            if (Objects.equals(option, "ENFORCE")) {
+//                                player.sendMessage(Component.text("enforced to update inventory!, " + player.getName() + "!"));
+//                            } else {
+//                                player.sendMessage(Component.text("filed to load!, " + player.getName() + "!"));
+//                            }
+//                            break;
+//                        }
+//                        try {
+//                            Thread.sleep(200);
+//                            steps += 200;
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                        preparedStatement = connection.prepareStatement(sql);
+//                        if (preparedStatement == null) return;
+//
+//                        rs = preparedStatement.executeQuery(sql);
+//                    }
+//                } else {
+//                    savePlayer(player, "INSERT");
+//                }
+//            }
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -268,6 +372,7 @@ public class StatusRecord {
             preparedStatement.setString(5, "SAVED");
             preparedStatement.executeUpdate();
         }
+        player.sendMessage(Component.text("save!, " + player.getName() + "!"));
 
     }
 
