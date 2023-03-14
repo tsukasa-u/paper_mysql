@@ -4,3 +4,5 @@ port: 3306
 database: "database_minecraft"
 username: "root"
 password : "passward"
+
+timeout: 3000
