@@ -4,7 +4,7 @@ minecraft paper server のインベントリを同期するためのプラグイ
 
 <br>
 
-# Table of Contents
+# Table of contents
 
 * [Table of contents](#table_of_contents)
 * [Introduction](#introduction)
@@ -12,8 +12,8 @@ minecraft paper server のインベントリを同期するためのプラグイ
   * [Step2](#step2)
   * [Step3](#step3)
 * [Command](#command)
-* [Test Environment](#test_environment)
-* [Q&A](#q&a)
+* [Environment](#environment)
+* [Q&A](#qa)
 
 <br>
 
@@ -84,7 +84,8 @@ timeout: 4000
 
 <br>
 
-# Test Environment
+# Environment
+test environment
 
 | type | name | version | URL |
 |---|---|---|---|
