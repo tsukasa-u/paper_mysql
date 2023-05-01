@@ -18,8 +18,8 @@ minecraft paper server のインベントリを同期するためのプラグイ
 <br>
 
 # Download
-
-[paper_mysql.jar (2023/03/15)](https://cdn.jsdelivr.net/gh/tsukasa-u/paper_mysql@main/out/artifacts/paper_mysql_jar/paper_mysql.jar)
+以下のファイルをダウンロードしてください。\
+[paper_mysql.jar (2023/03/15)](https://github.com/tsukasa-u/paper_mysql/raw/master/out/artifacts/paper_mysql_jar/paper_mysql.jar)
 
 <br>
 
