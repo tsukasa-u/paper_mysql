@@ -6,7 +6,7 @@
 
 ー環境ー
 	Linux　（Ubuntu　20.04）
-	Server　Perper			https://papermc.io/downloads/paper
+	Server　Parper			https://papermc.io/downloads/paper
 	ProxyServer　Velocity		https://papermc.io/downloads/velocity
 
 手順1（新規ワールド作成時）(paper)
