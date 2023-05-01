@@ -4,13 +4,18 @@ minecraft paper server のインベントリを同期するためのプラグイ
 
 <br>
 
-# Table of contents
+# Table of Contents
 
-* [Table of contents](#Introduction)
-* [Requirements](#requirements)
-  * [Linux and macOS](#linux-and-macos)
-  * [Windows](#windows)
-* [Command-Line Interface](#command-line-interface)
+* [Table of contents](#Table of Contents)
+* [Introduction](#Introduction)
+  * [Step1](#Step1)
+  * [Step2](#Step1)
+  * [Step3](#Step1)
+* [Command](#Command)
+* [Test Environment](#Test_Environment)
+* [Q&A](#Q&A)
+
+<br>
 
 # Download
 
@@ -64,6 +69,8 @@ port: 3306
 database: "database_name"
 username: "user_name"
 password : "passward"
+
+timeout: 4000
 ```
 2. ALL DONE!!
 
@@ -77,7 +84,7 @@ password : "passward"
 
 <br>
 
-# test environment
+# Test Environment
 
 | type | name | version | URL |
 |---|---|---|---|
@@ -88,4 +95,5 @@ password : "passward"
 <br>
 
 # Q&A
-・インベントリの同期が失敗する。
+* Q. インベントリの同期が失敗する。\
+    A. `config\paper_mysql\config.yml`の`timeout`に大きい値を設定しください。これにより、インベントリ同期の試行回数が増え、通信回線が遅い環境でもインベントリ処理が成功する場合があります。
