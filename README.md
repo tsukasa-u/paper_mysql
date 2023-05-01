@@ -6,14 +6,14 @@ minecraft paper server のインベントリを同期するためのプラグイ
 
 # Table of Contents
 
-* [Table of contents](#Table of Contents)
-* [Introduction](#Introduction)
-  * [Step1](#Step1)
-  * [Step2](#Step1)
-  * [Step3](#Step1)
-* [Command](#Command)
-* [Test Environment](#Test_Environment)
-* [Q&A](#Q&A)
+* [Table of contents](#table_of_contents)
+* [Introduction](#introduction)
+  * [Step1](#step1)
+  * [Step2](#step2)
+  * [Step3](#step3)
+* [Command](#command)
+* [Test Environment](#test_environment)
+* [Q&A](#q&a)
 
 <br>
 
