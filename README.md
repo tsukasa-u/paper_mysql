@@ -14,6 +14,7 @@ minecraft paper server のインベントリを同期するためのプラグイ
 * [Command](#command)
 * [Environment](#environment)
 * [Q&A](#qa)
+* [Bag Report](#bag_report)
 
 <br>
 
@@ -98,3 +99,8 @@ test environment
 # Q&A
 * Q. インベントリの同期が失敗する。\
     A. `config\paper_mysql\config.yml`の`timeout`に大きい値を設定しください。これにより、インベントリ同期の試行回数が増え、通信回線が遅い環境でもインベントリ処理が成功する場合があります。
+
+<br>
+
+# Bag Report
+* serverを長時間起動するとplaginのインベントリ同期処理が失敗する。(未修整　2023/06/23)
