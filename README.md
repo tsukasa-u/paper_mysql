@@ -4,17 +4,17 @@ minecraft paper server のインベントリを同期するためのプラグイ
 
 <br>
 
-# Table of contents
+# Table of Contents
 
-* [Table of contents](#table_of_contents)
+* [Table of Contents](#table-of-contents)
 * [Introduction](#introduction)
-  * [Step1](#step1)
-  * [Step2](#step2)
-  * [Step3](#step3)
+  * [Step1](#step-1)
+  * [Step2](#step-2)
+  * [Step3](#step-3)
 * [Command](#command)
-* [Environment](#environment)
+* [Test Environment](#test-environment)
 * [Q&A](#qa)
-* [Bag Report](#bag_report)
+* [Bug Report](#bug-report)
 
 <br>
 
@@ -26,7 +26,7 @@ minecraft paper server のインベントリを同期するためのプラグイ
 
 # Introduction
 
-## Step1
+## Step 1
 1. サーバーの`plagins`フォルダにダウンロードした`paper-mysql.jar`を移動。
 2. サーバーを起動。
 
@@ -36,7 +36,7 @@ java -jar paper-*.jar nogui
 
 3. `plagins\paper_mysql\config.yml`が生成される。 
 
-## Step2
+## Step 2
 1. mySQLを導入する。詳しくは[https://www.mysql.com/jp](https://www.mysql.com/jp/)や他サイトを確認してほしい。
 ```
 apt install mysql-server
@@ -62,7 +62,7 @@ CREATE TABLE inventory (name varchar(16), uuid varchar(36) NOT NULL PRIMARY KEY,
 \q
 ```
 
-## Step3
+## Step 3
 1. Paper serverの`plagins\paper_mysql\config.yml`の設定をする。`host`の設定値は外部のサーバーで実行するmuSQLを参照したい場合はそのサーバーアドレスを設定する。ローカル環境の場合は`localhost`を設定。`port`はmySQLのポート番号を変更した場合のみ変更する。`passward`はmySQLのパスワードを設定する。
 ```
 host: "localhost"
@@ -85,7 +85,7 @@ timeout: 4000
 
 <br>
 
-# Environment
+# Test Environment
 test environment
 
 | type | name | version | URL |
@@ -102,5 +102,5 @@ test environment
 
 <br>
 
-# Bag Report
-* serverを長時間起動するとplaginのインベントリ同期処理が失敗する。(未修整　2023/06/23)
+# Bug Report 
+* Serverを長時間起動するとplaginのインベントリ同期処理が失敗する。(未修整　2023/06/23)
