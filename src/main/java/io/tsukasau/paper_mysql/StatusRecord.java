@@ -265,7 +265,7 @@ public class StatusRecord {
 
             new Runnable().runTaskTimer(inventory_sync.getProvidingPlugin(), 0L, 4L);
 
-            closeConnection();
+//            closeConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -317,7 +317,7 @@ public class StatusRecord {
         }
         player.sendMessage(Component.text("save!, " + player.getName() + "!"));
 
-        closeConnection();
+//        closeConnection();
     }
 
     public boolean searchPlayer(Player player) throws SQLException {
