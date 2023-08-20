@@ -372,7 +372,7 @@ public class StatusRecord {
         }
 
         synchronized (this) {
-            if (connection != null && !connection.isClosed()) {
+            if (connection != null && connection.isClosed()) {
                 System.out.println("closed (synchronized)");
                 return;
             }
