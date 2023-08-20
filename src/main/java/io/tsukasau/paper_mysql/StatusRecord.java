@@ -220,6 +220,7 @@ public class StatusRecord {
                                 preparedStatement.setString(1, "LOADED");
                                 preparedStatement.setString(2, uuid.toString());
                                 preparedStatement.executeUpdate();
+                                preparedStatement.close();
 
                                 if (Objects.equals(option, "ENFORCE")) {
                                     player.sendMessage(Component.text("enforced to update inventory!, " + player.getName() + "!"));
@@ -233,7 +234,7 @@ public class StatusRecord {
                             } else if (Objects.equals(sql_status, "LOADED")) {
 
                                 if (steps > timeout) {
-                                    player.sendMessage(Component.text("filed to load!, " + player.getName() + "!"));
+                                    player.sendMessage(Component.text("failed to load!, " + player.getName() + "!"));
                                     cancel();
 //                                    break;
                                 }
@@ -254,77 +255,17 @@ public class StatusRecord {
                     } catch (SQLException ex) {
                         throw new RuntimeException(ex);
                     }
+                    try {
+                        rs.close();
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             };
 
             new Runnable().runTaskTimer(inventory_sync.getProvidingPlugin(), 0L, 4L);
-//
-//            while(true) {
-//                if (rs.next()) {
-//                    byte[] inventory_item = rs.getBytes(3);
-//                    byte[] ender_item = rs.getBytes(4);
-//                    String sql_status = rs.getString(5);
-//
-//                    if (Objects.equals(sql_status, "SAVED") || Objects.equals(option, "ENFORCE")) {
-//
-//                        int[] inventory_slot_array = {
-//                                0, 1, 2, 3, 4, 5, 6, 7, 8,
-//                                9, 10, 11, 12, 13, 14, 15, 16, 17,
-//                                18, 19, 20, 21, 22, 23, 24, 25, 26,
-//                                27, 28, 29, 30, 31, 32, 33, 34, 35,
-//                                36,37,38,39,40
-////                                100,
-////                                101,
-////                                102,
-////                                103,
-////                                106
-//                        };
-//                        int[] ender_slot_array = {
-//                                0, 1, 2, 3, 4, 5, 6, 7, 8,
-//                                9, 10, 11, 12, 13, 14, 15, 16, 17,
-//                                18, 19, 20, 21, 22, 23, 24, 25, 26
-//                        };
-//
-//                        load_ItemStack_JSON(player, inventory_slot_array, inventory_item, "inventory");
-//                        load_ItemStack_JSON(player, ender_slot_array, ender_item, "enderChest");
-//
-//
-//                        sql = "UPDATE inventory SET status = ? WHERE uuid = ?;";
-//                        preparedStatement = connection.prepareStatement(sql);
-//                        preparedStatement.setString(1, "LOADED");
-//                        preparedStatement.setString(2, uuid.toString());
-//                        preparedStatement.executeUpdate();
-//
-//                        player.sendMessage(Component.text("load!, " + player.getName() + "!"));
-//
-//                        break;
-//
-//                    } else if (Objects.equals(sql_status, "LOADED")) {
-//
-//                        if (steps < timeout) {
-//                            if (Objects.equals(option, "ENFORCE")) {
-//                                player.sendMessage(Component.text("enforced to update inventory!, " + player.getName() + "!"));
-//                            } else {
-//                                player.sendMessage(Component.text("filed to load!, " + player.getName() + "!"));
-//                            }
-//                            break;
-//                        }
-//                        try {
-//                            Thread.sleep(200);
-//                            steps += 200;
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                        preparedStatement = connection.prepareStatement(sql);
-//                        if (preparedStatement == null) return;
-//
-//                        rs = preparedStatement.executeQuery(sql);
-//                    }
-//                } else {
-//                    savePlayer(player, "INSERT");
-//                }
-//            }
 
+            closeConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -362,6 +303,7 @@ public class StatusRecord {
             preparedStatement.setString(3, "SAVED");
             preparedStatement.setString(4, uuid.toString());
             preparedStatement.executeUpdate();
+            preparedStatement.close();
         } else if (Objects.equals(option, "INSERT")) {
             String sql = "INSERT INTO inventory (name, uuid, inventory_item, ender_item, status) VALUES (?, ?, ?, ?, ?);";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -371,9 +313,11 @@ public class StatusRecord {
             preparedStatement.setBytes(4, ender_item);
             preparedStatement.setString(5, "SAVED");
             preparedStatement.executeUpdate();
+            preparedStatement.close();
         }
         player.sendMessage(Component.text("save!, " + player.getName() + "!"));
 
+        closeConnection();
     }
 
     public boolean searchPlayer(Player player) throws SQLException {
@@ -404,15 +348,41 @@ public class StatusRecord {
 
     private void openConnection() throws SQLException {
         if (connection != null && !connection.isClosed()) {
+
+            System.out.println("connected");
             return;
         }
 
         synchronized (this) {
             if (connection != null && !connection.isClosed()) {
+                System.out.println("connected (synchronized)");
                 return;
             }
 
             connection = DriverManager.getConnection("jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database, this.username, this.password);
+            System.out.println("connect");
+        }
+    }
+
+    private void closeConnection() throws SQLException {
+        if (connection != null && connection.isClosed()) {
+
+            System.out.println("closed");
+            return;
+        }
+
+        synchronized (this) {
+            if (connection != null && !connection.isClosed()) {
+                System.out.println("closed (synchronized)");
+                return;
+            }
+
+            if (connection != null) {
+                connection.close();
+                System.out.println("close");
+            } else {
+                System.out.println("returned null");
+            }
         }
     }
 }
